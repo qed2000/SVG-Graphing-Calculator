@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>SVG Graphing Calculator</title>
+    <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
+    <script language="JavaScript" type="text/javascript">
+        <!--//
+        /*************************************************************
+         * This code written by William Hornbaker qed_2000@hotmail.com
+         * Aug 12, 2013
+         *
+         * As a sample code, this file contains all of the javascript
+         * and css necessary to run the application.
+         *
+         * This code may be freely adapted for your uses, but please
+         * credit this code as appropriate. Thank you.
+         ************************************************************/
+        //-- Global variables defining graph window size
+        var GraphingCalculator = function( $c, height, width ) {
+            var $container = $c;
+            var bg, ax, glc;
+            var xx, xn, yx, yn;
+            var sinc, zinc;
+            var equation = [];
+            var cc = [];
+            var equationCounter = 1;
+
+            var setVars = function() {
+                xx = parseFloat( $container.find( '#xmax' ).val() );
+                xn = parseFloat( $container.find( '#xmin' ).val() );
+                yx = parseFloat( $container.find( '#ymax' ).val() );
+                yn = parseFloat( $container.find( '#ymin' ).val() );
+                bg = $container.find( '#bg' ).val();
+                ax = $container.find( '#ax' ).val();
+                glc = $container.find( '#glc' ).val();
+                sinc = parseFloat( $container.find( '#Sinc' ).val() );
+                zinc = parseFloat( $container.find( '#Zinc' ).val() );
+                equation = [];
+                $.each( $( '.equation' ), function() {
+                    equation.push( $( this ).val() );
+                } );
+                cc = [ '#008888', '#ff0000', '#005500', '#0000ff', '#000000', '#ff00ff' ];
+                $.each( $( '.fx' ), function( i ) {
+                    $( this ).css( { 'color' : cc [ i ] } );
+                } );
+            };
+
+            // Begin Math Functions
+            var ln = function( x ) { return Math.log( x ); }
+            var log = function( x ) { return Math.log( x ) / Math.LN10; }
+            var log2 = function( x ) { return Math.log( x ) / Math.LN2; }
+            var abs = function( x ) { return Math.abs( x ); }
+            var pow = function( x, y ) { return Math.pow( x, y ); }
+            var sqrt = function( x ) { return Math.sqrt( x ); }
+            var sin = function( x ) { return Math.sin( x ); }
+            var cos = function( x ) { return Math.cos( x ); }
+            var tan = function( x ) { return Math.tan( x ); }
+            var asin = function( x ) { return Math.asin( x ); }
+            var acos = function( x ) { return Math.acos( x ); }
+            var atan = function( x ) { return Math.atan( x ); }
+            // End Math Functions
+
+            var GoFigure = function( equation, xvalue ) {
+                //calculates calling math functions
+                var eq = equation;
+                eq = eq.replace( /([a-z\d\)]+)\^([a-z\d]+)/g, "pow($1,$2)" );
+                eq = eq.replace( /(\d)x/g, "$1*x" );
+                eq = eq.replace( /x/g, xvalue );
+                eq = eq.replace( /pi/g, Math.PI );
+                eq = eq.replace( /e/g, Math.E );
+                eq = eq.replace( /- *-/g, "+" );
+                eq = eq.replace( /(\d)([a-z\(])/g, "$1*$2" );
+                eq = eq.replace( /\)\(/g, ")*(" );
+                eq = eq.replace( /\)([a-z])/g, ")*$1" );
+                var answer = eval( eq );
+                return answer;
+            };
+
+            var SetGraph = function() {
+                //determines range of graph
+                var xRange = CheckRange( xx, xn );
+                var yRange = CheckRange( yx, yn );
+                var range = [ xRange[ 0 ], xRange[ 1 ], yRange[ 0 ], yRange[ 1 ] ];
+                $container.find( '#xmax' ).val( range[ 1 ] );
+                $container.find( '#xmin' ).val( range[ 0 ] );
+                $container.find( '#ymax' ).val( range[ 3 ] );
+                $container.find( '#ymin' ).val( range[ 2 ] );
+                return range;
+            };
+
+            var CheckRange = function( max, min ) {
+                return ( min > max ) ? [ max, min ] : [ min, max ];
+            };
+
+            //takes graph's x or y and returns the original x or y
+            var unTransformX = function( val, max, min ) {
+                return parseFloat( ( val ) * ( ( max - min ) / width ) + min );
+            };
+
+            //transforms x to match the graph
+            var TransformX = function( val, max, min ) {
+                return parseFloat( ( val - min ) * width / ( max - min ) );
+            };
+
+            //transforms y to match the graph
+            var TransformY = function( val, max, min ) {
+                return parseFloat( height - ( ( val - min ) * height / ( max - min ) ) );
+            };
+
+            var shifter = function( zed ) {
+                setVars();
+                if ( zed == 'up' ) {
+                    var shift = sinc * ( yx - yn );
+                    yx += shift;
+                    yn += shift;
+                } else if ( zed == 'down' ) {
+                    var shift = sinc * ( yx - yn );
+                    yx -= shift;
+                    yn -= shift;
+                } else if ( zed == 'left' ) {
+                    var shift = sinc * ( xx - xn );
+                    xx -= shift;
+                    xn -= shift;
+                } else if ( zed == 'right' ) {
+                    var shift = sinc * ( xx - xn );
+                    xx += shift;
+                    xn += shift;
+                } else if ( zed == 'in' ) {
+                    var shifty = zinc * ( yx - yn );
+                    yx -= shifty;
+                    yn += shifty;
+                    var shiftx = zinc * ( xx - xn );
+                    xx -= shiftx;
+                    xn += shiftx;
+                } else if ( zed == 'out' ) {
+                    var shifty = zinc * ( yx - yn );
+                    yx += shifty;
+                    yn -= shifty;
+                    var shiftx = zinc * ( xx - xn );
+                    xx += shiftx;
+                    xn -= shiftx;
+                }
+                if ( xn == 0 ) { xn = parseFloat( 0.0 ); }
+                if ( xx == 0 ) { xx = parseFloat( 0.0 ); }
+                if ( yn == 0 ) { yn = parseFloat( 0.0 ); }
+                if ( yx == 0 ) { yx = parseFloat( 0.0 ); }
+                makeAxis();
+                Graph();
+            };
+
+            var draw = function() {
+                var mySvg = document.getElementById( 'svgSpace' );
+                while ( mySvg.hasChildNodes() ) {
+                    mySvg.removeChild( mySvg.lastChild );
+                }
+                setVars();
+                makeAxis();
+                Graph();
+            };
+
+            var Trunc = function( a ) { return Math.round( a * 10000 ) / 10000; };
+
+            var drawLine = function( x1, y1, x2, y2, strokecolor, strokeweight ) {
+                if ( !isNaN( x1 ) && !isNaN( x2 ) && !isNaN( y1 ) && !isNaN( y2 )
+                        && x1 >= 0 && x2 >= 0 && y1 >= 0 && y2 >= 0 ) {
+                    var mySvg = document.getElementById( 'svgSpace' );
+                    var line = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
+                    line.setAttribute( 'x1', x1 );
+                    line.setAttribute( 'y1', y1 );
+                    line.setAttribute( 'x2', x2 );
+                    line.setAttribute( 'y2', y2 );
+                    line.setAttribute( 'x2', x2 );
+                    line.setAttribute( 'stroke', strokecolor );
+                    line.setAttribute( 'stroke-width', strokeweight );
+                    mySvg.appendChild( line );
+                }
+            };
+
+            var Graph = function() {
+                //draws the graph
+                var range = SetGraph();
+                xx = parseFloat( range[ 1 ] );
+                xn = parseFloat( range[ 0 ] );
+                yx = range[ 3 ];
+                yn = range[ 2 ];
+                for ( var i = 0; i < equation.length; i++ ) {
+                    if ( equation[ i ] !== '' ) { equater( xx, xn, yx, yn, equation[ i ], cc[ i ] ); }
+                }
+            };
+
+            var equater = function( xx, xn, yx, yn, eq, cc ) {
+                for ( var i = 0; i < width; i ) {
+                    var xvalue = unTransformX( i, xx, xn );
+                    xvalue = Trunc( xvalue );
+                    var yvalue = GoFigure( eq, xvalue );
+                    var ypoint1 = TransformY( yvalue, yx, yn );
+                    if ( ypoint1 < 0 ) { ypoint1 = 0; }
+                    if ( ypoint1 > height ) { ypoint1 = height; }
+                    var j = i + 1;
+                    xvalue = unTransformX( j, xx, xn );
+                    xvalue = Trunc( xvalue );
+                    yvalue = GoFigure( eq, xvalue );
+                    ypoint2 = TransformY( yvalue, yx, yn );
+                    if ( ypoint2 < 0 ) { ypoint2 = 0; }
+                    if ( ypoint2 > height ) { ypoint2 = height; }
+                    if ( !( ( ( ypoint1 == 0 ) && ( ypoint2 == 0 ) ) || ( ( ypoint1 == height ) && ( ypoint2 == height ) ) ) ) {
+                        drawLine( i, ypoint1, j, ypoint2, cc, 1 );
+                    }
+                    i = j;
+                }
+            };
+
+            var makeAxis = function() {
+                var mySvg = document.getElementById( 'svgSpace' );
+                var rect = document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
+                rect.setAttribute( 'width', width + 'px' );
+                rect.setAttribute( 'height', height + 'px' );
+                rect.setAttribute( 'fill', bg );
+                rect.setAttribute( 'x', 0 );
+                rect.setAttribute( 'y', 0 );
+                rect.setAttribute( 'stroke', '#000000' );
+                rect.setAttribute( 'stroke-width', 1 );
+                mySvg.appendChild( rect );
+
+                var range = SetGraph();
+                xx = parseFloat( range[ 1 ] );
+                xn = parseFloat( range[ 0 ] );
+                yx = range[ 3 ];
+                yn = range[ 2 ];
+                var marks = document.equater.marks;
+                var mark;
+                for ( var i = 0; i < marks.length; i++ ) {
+                    if ( marks[ i ].checked ) {
+                        mark = marks[ i ].value;
+                        break;
+                    }
+                }
+                var xaxis = TransformY( 0, yx, yn );
+                var yaxis = TransformX( 0, xx, xn );
+                if ( xaxis > 0 && xaxis < height ) {
+                    drawLine( 0, xaxis, width, xaxis, ax, 2 );
+                }
+                if ( yaxis > 0 && yaxis < width ) {
+                    drawLine( yaxis, 0, yaxis, height, ax, 2 );
+                }
+                //x-hash positive & negative
+                if ( mark == 'Hash' && ( xaxis > 0 && xaxis < height ) ) {
+                    for ( var i = 1; i <= xx; i++ ) {
+                        var xp = TransformX( i, xx, xn );
+                        drawLine( xp, ( xaxis + 2 ), xp, ( xaxis - 2 ), ax, 1 );
+                    }
+                    for ( var i = -1; i >= xn; i-- ) {
+                        var xp = TransformX( i, xx, xn );
+                        drawLine( xp, ( xaxis + 2 ), xp, ( xaxis - 2 ), ax, 1 );
+                    }
+                }
+                //y-hash positive & negative
+                if ( mark == 'Hash' && ( yaxis > 0 && yaxis < width ) ) {
+                    for ( var i = 1; i <= yx; i++ ) {
+                        var yp = TransformY( i, yx, yn );
+                        drawLine( ( yaxis - 2 ), yp, ( yaxis + 2 ), yp, ax, 1 );
+                    }
+                    for ( var i = -1; i >= yn; i-- ) {
+                        var yp = TransformY( i, yx, yn );
+                        drawLine( ( yaxis - 2 ), yp, ( yaxis + 2 ), yp, ax, 1 );
+                    }
+                }
+                //x-grid positive & negative
+                if ( mark == 'Grid' ) {
+                    for ( var i = 1; i <= xx; i++ ) {
+                        var xp = TransformX( i, xx, xn );
+                        drawLine( xp, 0, xp, height, glc, 1 );
+                    }
+                    for ( var i = -1; i >= xn; i-- ) {
+                        var xp = TransformX( i, xx, xn );
+                        drawLine( xp, 0, xp, height, glc, 1 );
+                    }
+                }
+                //y-grid positive & negative
+                if ( mark == 'Grid' ) {
+                    for ( var i = 1; i <= yx; i++ ) {
+                        var yp = TransformY( i, yx, yn );
+                        drawLine( 0, yp, width, yp, glc, 1 );
+                    }
+                    for ( var i = -1; i >= yn; i-- ) {
+                        var yp = TransformY( i, yx, yn );
+                        drawLine( 0, yp, width, yp, glc, 1 );
+                    }
+                }
+            }
+
+            var binder = function() {
+                $( '#graphIt' ).unbind().bind( 'click', function() { draw(); } );
+                $( '#ShiftUp' ).unbind().bind( 'click', function() { shifter( 'up' ); } );
+                $( '#ShiftDown' ).unbind().bind( 'click', function() { shifter( 'down' ); } );
+                $( '#ShiftLeft' ).unbind().bind( 'click', function() { shifter( 'left' ); } );
+                $( '#ShiftRight' ).unbind().bind( 'click', function() { shifter( 'right' ); } );
+                $( '#ZoomIn' ).unbind().bind( 'click', function() { shifter( 'in' ); } );
+                $( '#ZoomOut' ).unbind().bind( 'click', function() { shifter( 'out' ); } );
+                $( '#addFx' ).unbind().bind( 'click', function() { addEquation(); } );
+            };
+
+            var addEquation = function () {
+                if ( equationCounter++ < 6 ) {
+                    var input = $( '<input />', { 'type' : 'text', 'class' : 'equation' } ).attr( { 'size' : '30' } );
+                    var span = $( '<span />', { 'class' : 'fx' } ).html( '<i>f</i><sub>' + equationCounter + '</sub>(x): ' );
+                    var div = $( '<div />' ).append( span ).append( input );
+                    $( '#equations' ).append( div );
+                    setVars();
+                }
+                if ( equationCounter === 5 ) {
+                    $( '#addFx' ).hide();
+                }
+            };
+
+            var setBackground = function() {
+                var container = document.getElementById( 'mapFrame' );
+                var mySvg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+                mySvg.setAttribute( 'version', '1.1' );
+                mySvg.setAttribute( 'id', 'svgSpace' );
+                mySvg.setAttribute( 'width', width + 'px' );
+                mySvg.setAttribute( 'height', height + 'px' );
+                container.appendChild( mySvg );
+            };
+
+            var buildKey = function() {
+                var blackout = $( '<div />', { 'class' : 'blackout' } );
+                var key = $( '#key' );
+                key.addClass( 'modalBox' ).show();
+                var keyBlock = $( '<div />', { 'class' : 'modalBlock' } ).append( blackout ).append( key );
+                $( 'body' ).prepend( keyBlock );
+                $( '#closeKey' ).unbind().bind( 'click', function(){
+                    keyBlock.hide();
+                } );
+                $( '#showKey' ).unbind().bind( 'click', function(){
+                    keyBlock.show();
+                } );
+            };
+
+            var init = function() {
+                binder();
+                setBackground();
+                draw();
+                buildKey();
+            };
+
+            init();
+        };
+
+        var layout = function() {
+            var screenWidth = $( window ).width();
+            var screenHeight = $( window ).height();
+            screenWidth -= 5;
+            screenHeight -= 10;
+            if ( screenWidth > 600 ) {
+                menuWidth = 280
+                graph = screenWidth - menuWidth;
+                footer = 40;
+                mainHeight = screenHeight - footer - 0;
+                $( '#mainMenu' ).css( {
+                    'height' : mainHeight + 'px',
+                    'width' : menuWidth + 'px',
+                    'top' : '5px',
+                    'left' : '0px'
+                } );
+                $( '#mapFrame' ).css( {
+                    'height' : mainHeight + 'px',
+                    'width' : graph + 'px',
+                    'top' : '5px',
+                    'left' : menuWidth + 'px'
+                } );
+                $( '#footerControls' ).css( {
+                    'height' : ( footer -5 ) + 'px',
+                    'width' : screenWidth + 'px',
+                    'left' : '0px',
+                    'top' : mainHeight + 'px'
+                } );
+                return { 'height' : mainHeight, 'width' : graph };
+            }
+            return false;
+        };
+        //-------------------------------------------
+
+        $( 'document' ).ready( function() {
+            var dims = layout();
+            if ( dims ) {
+                var Grapher = new GraphingCalculator( $( '#container' ), dims.height, dims.width );
+            } else {
+                alert( 'Please increase the size of this browser to view this app, and then refresh the page.' );
+            }
+        } );
+
+        //-->
+    </script>
+    <style type="text/css">
+        body {
+            margin : 0px;
+            padding : 0px;
+            background-color : #d0d0d0;
+        }
+        #mainMenu {
+            position : absolute;
+            text-align : center;
+            background-color : #d0d0d0;
+        }
+        #mapFrame {
+            position : absolute;
+            background-color : #808080;
+        }
+        #footerControls {
+            position : absolute;
+            text-align : center;
+            margin-top : 10px;
+            background-color : #d0d0d0;
+        }
+        h1 {
+            font-size : 22px;
+        }
+        #customize {
+            display : none;
+        }
+        #tk {
+            display:none;
+        }
+        #key {
+            margin: 0 auto;
+            position: relative;
+            display : none;
+            background-color : #e0e0e0;
+            border : 1px solid #404040;
+            width : 400px;
+            height : 400px;
+            top : 50px;
+        }
+        .modalBlock {
+            display : none;
+        }
+        .blackout {
+            background : none repeat scroll 0 0 rgba(0, 0, 0, 0.7);
+            height : 100%;
+            left : 0;
+            overflow-y : auto;
+            position : fixed;
+            top : 0;
+            width : 100%;
+            z-index : 999999;
+        }
+        .modalBox {
+            font-size : 12px;
+            position : fixed;
+            top : 40%;
+            width : 100%;
+            z-index : 1999999;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <section id="mainMenu">
+        <h1>SVG Graphing Calculator</h1>
+        <form name="equater">
+            <div id="equations">
+                <div><span class="fx"><i>f</i><sub>1</sub>(x): </span><input type="text" size="30" class="equation"></div>
+            </div>
+            <input type="button" value="Add an Equation" id="addFx" /><br />
+            <input type="button" value="Graph it!" id="graphIt" />
+            <div id="graphOptions">
+                <input type="radio" name="marks" value="Axis" CHECKED /> Axis Only<br />
+                <input type="radio" name="marks" value="Hash" /> Hash Marks<br />
+                <input type="radio" name="marks" value="Grid" /> Grid Lines<br />
+
+                <h3 align="center">Range</h3>
+                X<sub>min</sub>: <input type="text" value="-5" id="xmin" size=8 />&nbsp;&nbsp;
+                X<sub>max</sub>: <input type="text" value="5" id="xmax" size=8 /><br />
+                Y<sub>min</sub>: <input type="text" value="-5" id="ymin" size=8 />&nbsp;&nbsp;
+                Y<sub>max</sub>: <input type="text" value="5" id="ymax" size=8 /><br /><br />
+
+                <input type="reset" value="Reset" />&nbsp;&nbsp;
+                <input type="button" value="Key" id="showKey" title="Learn how to use advanced functions" />
+            </div>
+        </form>
+    </section>
+    <section id="mapFrame">
+    </section>
+    <section id="footerControls">
+        <input type="button" value="Left " id="ShiftLeft" />&nbsp;&nbsp;
+        <input type="button" value="Right" id="ShiftRight" />&nbsp;&nbsp;
+        <input type="button" value=" Up  " id="ShiftUp" />&nbsp;&nbsp;
+        <input type="button" value="Down " id="ShiftDown" />&nbsp;&nbsp;
+        <input type="hidden" value=".1" id="Sinc" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" value="Zoom In " id="ZoomIn" />&nbsp;&nbsp;
+        <input type="button" value="Zoom Out" id="ZoomOut" />&nbsp;&nbsp;
+        <input type="hidden" value=".1" id="Zinc" />
+    </section>
+    <div id="customize">
+        <input type="text" id="bg" value="#f0f0f0" />
+        <input type="text" id="ax" value="#555555" />
+        <input type="text" id="glc" value="#aaaaaa" />
+    </div>
+    <div id="key">
+        <table cellpadding="4" align="center">
+            <tr>
+                <td colspan="3" align="center">
+                    <h2>Key:</h2>
+                </td>
+            </tr>
+            <tr>
+                <td><b>For:</b></td> <td><b>Use:</b></td>
+            </tr>
+            <tr>
+                <td>x<sup>2</sup></td> <td>pow(x,2)</td>
+            </tr>
+            <tr>
+                <td>2x<sup>3</sup>+4x<sup>2</sup>-x+3</td> <td>2pow(x,3)+4pow(x,2)-x+3</td>
+            </tr>
+            <tr>
+                <td>sinx</td> <td>sin(x)</td>
+            </tr>
+            <tr>
+                <td>sin2x</td> <td>sin(2x)</td>
+            </tr>
+            <tr>
+                <td>&#x221A;2</td> <td>sqrt(2)</td>
+            </tr>
+            <tr>
+                <td>log<sub>2</sub>x</td> <td>log2(x)</td>
+            </tr>
+            <tr>
+                <td>log<sub>10</sub>x</td> <td>log(x)</td>
+            </tr>
+            <tr>
+                <td>e</td> <td>e</td>
+            </tr>
+            <tr>
+                <td>&pi;</td> <td>pi</td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="button" value="Close" id="closeKey" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<img src="../t.php?p=svgCalc.png" id="tk" />
+</body>
+</html>
