@@ -57,8 +57,7 @@
 
                 GoFigure = function (equation, xvalue) {
                     //calculates calling math functions
-                    var eq = equation;
-                    eq = eq.replace(/([a-z\d\)]+)\^([a-z\d]+)/g, 'pow($1,$2)')
+                    var eq = equation.replace(/([a-z\d\)]+)\^([a-z\d]+)/g, 'pow($1,$2)')
                             .replace(/(\d)x/g, '$1*x')
                             .replace(/x/g, xvalue)
                             .replace(/pi/g, Math.PI)
