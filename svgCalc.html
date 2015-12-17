@@ -6,340 +6,374 @@
     <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
     <script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
     <script language="JavaScript" type="text/javascript">
-        <!--//
-        /*************************************************************
-         * This code written by William Hornbaker qed_2000@hotmail.com
-         * Aug 12, 2013
-         *
-         * As a sample code, this file contains all of the javascript
-         * and css necessary to run the application.
-         *
-         * This code may be freely adapted for your uses, but please
-         * credit this code as appropriate. Thank you.
-         ************************************************************/
         //-- Global variables defining graph window size
-        var GraphingCalculator = function( $c, height, width ) {
-            var $container = $c;
-            var bg, ax, glc;
-            var xx, xn, yx, yn;
-            var sinc, zinc;
-            var equation = [];
-            var cc = [];
-            var equationCounter = 1;
+        var GraphingCalculator = function ($c, height, width) {
+            var bg, ax, glc,
+                xx, xn, yx, yn,
+                sinc, zinc,
+                $container = $c,
+                equation = [],
+                cc = [],
+                equationCounter = 1,
 
-            var setVars = function() {
-                xx = parseFloat( $container.find( '#xmax' ).val() );
-                xn = parseFloat( $container.find( '#xmin' ).val() );
-                yx = parseFloat( $container.find( '#ymax' ).val() );
-                yn = parseFloat( $container.find( '#ymin' ).val() );
-                bg = $container.find( '#bg' ).val();
-                ax = $container.find( '#ax' ).val();
-                glc = $container.find( '#glc' ).val();
-                sinc = parseFloat( $container.find( '#Sinc' ).val() );
-                zinc = parseFloat( $container.find( '#Zinc' ).val() );
-                equation = [];
-                $.each( $( '.equation' ), function() {
-                    equation.push( $( this ).val() );
-                } );
-                cc = [ '#008888', '#ff0000', '#005500', '#0000ff', '#000000', '#ff00ff' ];
-                $.each( $( '.fx' ), function( i ) {
-                    $( this ).css( { 'color' : cc [ i ] } );
-                } );
-            };
+                setVars = function () {
+                    xx = parseFloat($container.find('#xmax').val());
+                    xn = parseFloat($container.find('#xmin').val());
+                    yx = parseFloat($container.find('#ymax').val());
+                    yn = parseFloat($container.find('#ymin').val());
+                    bg = $container.find('#bg').val();
+                    ax = $container.find('#ax').val();
+                    glc = $container.find('#glc').val();
+                    sinc = parseFloat($container.find('#Sinc').val());
+                    zinc = parseFloat($container.find('#Zinc').val());
+                    equation = [];
+                    $.each($('.equation'), function () {
+                        equation.push($(this).val());
+                    });
+                    cc = ['#008888', '#ff0000', '#005500', '#0000ff', '#000000', '#ff00ff'];
+                    $.each($('.fx'), function (i) {
+                        $(this).css({ 'color': cc[i] });
+                    });
+                },
 
-            // Begin Math Functions
-            var ln = function( x ) { return Math.log( x ); }
-            var log = function( x ) { return Math.log( x ) / Math.LN10; }
-            var log2 = function( x ) { return Math.log( x ) / Math.LN2; }
-            var abs = function( x ) { return Math.abs( x ); }
-            var pow = function( x, y ) { return Math.pow( x, y ); }
-            var sqrt = function( x ) { return Math.sqrt( x ); }
-            var sin = function( x ) { return Math.sin( x ); }
-            var cos = function( x ) { return Math.cos( x ); }
-            var tan = function( x ) { return Math.tan( x ); }
-            var asin = function( x ) { return Math.asin( x ); }
-            var acos = function( x ) { return Math.acos( x ); }
-            var atan = function( x ) { return Math.atan( x ); }
-            // End Math Functions
+                // Begin Math Functions
+                abs = Math.abs,
+                pow = Math.pow,
+                sqrt = Math.sqrt,
+                sin = Math.sin,
+                cos = Math.cos,
+                tan = Math.tan,
+                asin = Math.asin,
+                acos = Math.acos,
+                atan = Math.atan,
+                ln = Math.log,
+                log = function (x) {
+                    return Math.log(x) / Math.LN10;
+                },
+                log2 = function (x) {
+                    return Math.log(x) / Math.LN2;
+                },
+                // End Math Functions
 
-            var GoFigure = function( equation, xvalue ) {
-                //calculates calling math functions
-                var eq = equation;
-                eq = eq.replace( /([a-z\d\)]+)\^([a-z\d]+)/g, "pow($1,$2)" );
-                eq = eq.replace( /(\d)x/g, "$1*x" );
-                eq = eq.replace( /x/g, xvalue );
-                eq = eq.replace( /pi/g, Math.PI );
-                eq = eq.replace( /e/g, Math.E );
-                eq = eq.replace( /- *-/g, "+" );
-                eq = eq.replace( /(\d)([a-z\(])/g, "$1*$2" );
-                eq = eq.replace( /\)\(/g, ")*(" );
-                eq = eq.replace( /\)([a-z])/g, ")*$1" );
-                var answer = eval( eq );
-                return answer;
-            };
+                GoFigure = function (equation, xvalue) {
+                    //calculates calling math functions
+                    var eq = equation.replace(/([a-z\d\)]+)\^([a-z\d]+)/g, 'pow($1,$2)')
+                            .replace(/(\d)x/g, '$1*x')
+                            .replace(/x/g, xvalue)
+                            .replace(/pi/g, Math.PI)
+                            .replace(/e/g, Math.E)
+                            .replace(/- *-/g, '+')
+                            .replace(/(\d)([a-z\(])/g, '$1*$2')
+                            .replace(/\)\(/g, ')*(')
+                            .replace(/\)([a-z])/g, ')*$1');
+                    return eval(eq);
+                },
 
-            var SetGraph = function() {
-                //determines range of graph
-                var xRange = CheckRange( xx, xn );
-                var yRange = CheckRange( yx, yn );
-                var range = [ xRange[ 0 ], xRange[ 1 ], yRange[ 0 ], yRange[ 1 ] ];
-                $container.find( '#xmax' ).val( range[ 1 ] );
-                $container.find( '#xmin' ).val( range[ 0 ] );
-                $container.find( '#ymax' ).val( range[ 3 ] );
-                $container.find( '#ymin' ).val( range[ 2 ] );
-                return range;
-            };
+                SetGraph = function () {
+                    //determines range of graph
+                    var xRange = CheckRange(xx, xn),
+                        yRange = CheckRange(yx, yn),
+                        range = [xRange[0], xRange[1], yRange[0], yRange[1]];
 
-            var CheckRange = function( max, min ) {
-                return ( min > max ) ? [ max, min ] : [ min, max ];
-            };
+                    $container.find('#xmax').val(range[1]);
+                    $container.find('#xmin').val(range[0]);
+                    $container.find('#ymax').val(range[3]);
+                    $container.find('#ymin').val(range[2]);
+                    return range;
+                },
 
-            //takes graph's x or y and returns the original x or y
-            var unTransformX = function( val, max, min ) {
-                return parseFloat( ( val ) * ( ( max - min ) / width ) + min );
-            };
+                CheckRange = function (max, min) {
+                    return (min > max) ? [max, min] : [min, max];
+                },
 
-            //transforms x to match the graph
-            var TransformX = function( val, max, min ) {
-                return parseFloat( ( val - min ) * width / ( max - min ) );
-            };
+                //takes graph's x or y and returns the original x or y
+                unTransformX = function (val, max, min) {
+                    return parseFloat((val) * ((max - min) / width) + min);
+                },
 
-            //transforms y to match the graph
-            var TransformY = function( val, max, min ) {
-                return parseFloat( height - ( ( val - min ) * height / ( max - min ) ) );
-            };
+                //transforms x to match the graph
+                TransformX = function (val, max, min) {
+                    return parseFloat((val - min) * width / (max - min));
+                },
 
-            var shifter = function( zed ) {
-                setVars();
-                if ( zed == 'up' ) {
-                    var shift = sinc * ( yx - yn );
-                    yx += shift;
-                    yn += shift;
-                } else if ( zed == 'down' ) {
-                    var shift = sinc * ( yx - yn );
-                    yx -= shift;
-                    yn -= shift;
-                } else if ( zed == 'left' ) {
-                    var shift = sinc * ( xx - xn );
-                    xx -= shift;
-                    xn -= shift;
-                } else if ( zed == 'right' ) {
-                    var shift = sinc * ( xx - xn );
-                    xx += shift;
-                    xn += shift;
-                } else if ( zed == 'in' ) {
-                    var shifty = zinc * ( yx - yn );
-                    yx -= shifty;
-                    yn += shifty;
-                    var shiftx = zinc * ( xx - xn );
-                    xx -= shiftx;
-                    xn += shiftx;
-                } else if ( zed == 'out' ) {
-                    var shifty = zinc * ( yx - yn );
-                    yx += shifty;
-                    yn -= shifty;
-                    var shiftx = zinc * ( xx - xn );
-                    xx += shiftx;
-                    xn -= shiftx;
-                }
-                if ( xn == 0 ) { xn = parseFloat( 0.0 ); }
-                if ( xx == 0 ) { xx = parseFloat( 0.0 ); }
-                if ( yn == 0 ) { yn = parseFloat( 0.0 ); }
-                if ( yx == 0 ) { yx = parseFloat( 0.0 ); }
-                makeAxis();
-                Graph();
-            };
+                //transforms y to match the graph
+                TransformY = function (val, max, min) {
+                    return parseFloat(height - ((val - min) * height / (max - min)));
+                },
 
-            var draw = function() {
-                var mySvg = document.getElementById( 'svgSpace' );
-                while ( mySvg.hasChildNodes() ) {
-                    mySvg.removeChild( mySvg.lastChild );
-                }
-                setVars();
-                makeAxis();
-                Graph();
-            };
-
-            var Trunc = function( a ) { return Math.round( a * 10000 ) / 10000; };
-
-            var drawLine = function( x1, y1, x2, y2, strokecolor, strokeweight ) {
-                if ( !isNaN( x1 ) && !isNaN( x2 ) && !isNaN( y1 ) && !isNaN( y2 )
-                        && x1 >= 0 && x2 >= 0 && y1 >= 0 && y2 >= 0 ) {
-                    var mySvg = document.getElementById( 'svgSpace' );
-                    var line = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
-                    line.setAttribute( 'x1', x1 );
-                    line.setAttribute( 'y1', y1 );
-                    line.setAttribute( 'x2', x2 );
-                    line.setAttribute( 'y2', y2 );
-                    line.setAttribute( 'x2', x2 );
-                    line.setAttribute( 'stroke', strokecolor );
-                    line.setAttribute( 'stroke-width', strokeweight );
-                    mySvg.appendChild( line );
-                }
-            };
-
-            var Graph = function() {
-                //draws the graph
-                var range = SetGraph();
-                xx = parseFloat( range[ 1 ] );
-                xn = parseFloat( range[ 0 ] );
-                yx = range[ 3 ];
-                yn = range[ 2 ];
-                for ( var i = 0; i < equation.length; i++ ) {
-                    if ( equation[ i ] !== '' ) { equater( xx, xn, yx, yn, equation[ i ], cc[ i ] ); }
-                }
-            };
-
-            var equater = function( xx, xn, yx, yn, eq, cc ) {
-                for ( var i = 0; i < width; i ) {
-                    var xvalue = unTransformX( i, xx, xn );
-                    xvalue = Trunc( xvalue );
-                    var yvalue = GoFigure( eq, xvalue );
-                    var ypoint1 = TransformY( yvalue, yx, yn );
-                    if ( ypoint1 < 0 ) { ypoint1 = 0; }
-                    if ( ypoint1 > height ) { ypoint1 = height; }
-                    var j = i + 1;
-                    xvalue = unTransformX( j, xx, xn );
-                    xvalue = Trunc( xvalue );
-                    yvalue = GoFigure( eq, xvalue );
-                    ypoint2 = TransformY( yvalue, yx, yn );
-                    if ( ypoint2 < 0 ) { ypoint2 = 0; }
-                    if ( ypoint2 > height ) { ypoint2 = height; }
-                    if ( !( ( ( ypoint1 == 0 ) && ( ypoint2 == 0 ) ) || ( ( ypoint1 == height ) && ( ypoint2 == height ) ) ) ) {
-                        drawLine( i, ypoint1, j, ypoint2, cc, 1 );
-                    }
-                    i = j;
-                }
-            };
-
-            var makeAxis = function() {
-                var mySvg = document.getElementById( 'svgSpace' );
-                var rect = document.createElementNS( 'http://www.w3.org/2000/svg', 'rect' );
-                rect.setAttribute( 'width', width + 'px' );
-                rect.setAttribute( 'height', height + 'px' );
-                rect.setAttribute( 'fill', bg );
-                rect.setAttribute( 'x', 0 );
-                rect.setAttribute( 'y', 0 );
-                rect.setAttribute( 'stroke', '#000000' );
-                rect.setAttribute( 'stroke-width', 1 );
-                mySvg.appendChild( rect );
-
-                var range = SetGraph();
-                xx = parseFloat( range[ 1 ] );
-                xn = parseFloat( range[ 0 ] );
-                yx = range[ 3 ];
-                yn = range[ 2 ];
-                var marks = document.equater.marks;
-                var mark;
-                for ( var i = 0; i < marks.length; i++ ) {
-                    if ( marks[ i ].checked ) {
-                        mark = marks[ i ].value;
-                        break;
-                    }
-                }
-                var xaxis = TransformY( 0, yx, yn );
-                var yaxis = TransformX( 0, xx, xn );
-                if ( xaxis > 0 && xaxis < height ) {
-                    drawLine( 0, xaxis, width, xaxis, ax, 2 );
-                }
-                if ( yaxis > 0 && yaxis < width ) {
-                    drawLine( yaxis, 0, yaxis, height, ax, 2 );
-                }
-                //x-hash positive & negative
-                if ( mark == 'Hash' && ( xaxis > 0 && xaxis < height ) ) {
-                    for ( var i = 1; i <= xx; i++ ) {
-                        var xp = TransformX( i, xx, xn );
-                        drawLine( xp, ( xaxis + 2 ), xp, ( xaxis - 2 ), ax, 1 );
-                    }
-                    for ( var i = -1; i >= xn; i-- ) {
-                        var xp = TransformX( i, xx, xn );
-                        drawLine( xp, ( xaxis + 2 ), xp, ( xaxis - 2 ), ax, 1 );
-                    }
-                }
-                //y-hash positive & negative
-                if ( mark == 'Hash' && ( yaxis > 0 && yaxis < width ) ) {
-                    for ( var i = 1; i <= yx; i++ ) {
-                        var yp = TransformY( i, yx, yn );
-                        drawLine( ( yaxis - 2 ), yp, ( yaxis + 2 ), yp, ax, 1 );
-                    }
-                    for ( var i = -1; i >= yn; i-- ) {
-                        var yp = TransformY( i, yx, yn );
-                        drawLine( ( yaxis - 2 ), yp, ( yaxis + 2 ), yp, ax, 1 );
-                    }
-                }
-                //x-grid positive & negative
-                if ( mark == 'Grid' ) {
-                    for ( var i = 1; i <= xx; i++ ) {
-                        var xp = TransformX( i, xx, xn );
-                        drawLine( xp, 0, xp, height, glc, 1 );
-                    }
-                    for ( var i = -1; i >= xn; i-- ) {
-                        var xp = TransformX( i, xx, xn );
-                        drawLine( xp, 0, xp, height, glc, 1 );
-                    }
-                }
-                //y-grid positive & negative
-                if ( mark == 'Grid' ) {
-                    for ( var i = 1; i <= yx; i++ ) {
-                        var yp = TransformY( i, yx, yn );
-                        drawLine( 0, yp, width, yp, glc, 1 );
-                    }
-                    for ( var i = -1; i >= yn; i-- ) {
-                        var yp = TransformY( i, yx, yn );
-                        drawLine( 0, yp, width, yp, glc, 1 );
-                    }
-                }
-            }
-
-            var binder = function() {
-                $( '#graphIt' ).unbind().bind( 'click', function() { draw(); } );
-                $( '#ShiftUp' ).unbind().bind( 'click', function() { shifter( 'up' ); } );
-                $( '#ShiftDown' ).unbind().bind( 'click', function() { shifter( 'down' ); } );
-                $( '#ShiftLeft' ).unbind().bind( 'click', function() { shifter( 'left' ); } );
-                $( '#ShiftRight' ).unbind().bind( 'click', function() { shifter( 'right' ); } );
-                $( '#ZoomIn' ).unbind().bind( 'click', function() { shifter( 'in' ); } );
-                $( '#ZoomOut' ).unbind().bind( 'click', function() { shifter( 'out' ); } );
-                $( '#addFx' ).unbind().bind( 'click', function() { addEquation(); } );
-            };
-
-            var addEquation = function () {
-                if ( equationCounter++ < 6 ) {
-                    var input = $( '<input />', { 'type' : 'text', 'class' : 'equation' } ).attr( { 'size' : '30' } );
-                    var span = $( '<span />', { 'class' : 'fx' } ).html( '<i>f</i><sub>' + equationCounter + '</sub>(x): ' );
-                    var div = $( '<div />' ).append( span ).append( input );
-                    $( '#equations' ).append( div );
+                shifter = function (zed) {
+                    var shift;
                     setVars();
-                }
-                if ( equationCounter === 5 ) {
-                    $( '#addFx' ).hide();
-                }
-            };
+                    if (zed == 'up') {
+                        shift = sinc * (yx - yn);
+                        yx += shift;
+                        yn += shift;
+                    } else if (zed == 'down') {
+                        shift = sinc * (yx - yn);
+                        yx -= shift;
+                        yn -= shift;
+                    } else if (zed == 'left') {
+                        shift = sinc * (xx - xn);
+                        xx -= shift;
+                        xn -= shift;
+                    } else if (zed == 'right') {
+                        shift = sinc * (xx - xn);
+                        xx += shift;
+                        xn += shift;
+                    } else if (zed == 'in') {
+                        shifty = zinc * (yx - yn);
+                        yx -= shifty;
+                        yn += shifty;
+                        shiftx = zinc * (xx - xn);
+                        xx -= shiftx;
+                        xn += shiftx;
+                    } else if (zed == 'out') {
+                        shifty = zinc * (yx - yn);
+                        yx += shifty;
+                        yn -= shifty;
+                        shiftx = zinc * (xx - xn);
+                        xx += shiftx;
+                        xn -= shiftx;
+                    }
+                    if (xn === 0) {
+                        xn = parseFloat(0.0);
+                    }
+                    if (xx === 0) {
+                        xx = parseFloat(0.0);
+                    }
+                    if (yn === 0) {
+                        yn = parseFloat(0.0);
+                    }
+                    if (yx === 0) {
+                        yx = parseFloat(0.0);
+                    }
+                    makeAxis();
+                    Graph();
+                },
 
-            var setBackground = function() {
-                var container = document.getElementById( 'mapFrame' );
-                var mySvg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-                mySvg.setAttribute( 'version', '1.1' );
-                mySvg.setAttribute( 'id', 'svgSpace' );
-                mySvg.setAttribute( 'width', width + 'px' );
-                mySvg.setAttribute( 'height', height + 'px' );
-                container.appendChild( mySvg );
-            };
+                draw = function () {
+                    var mySvg = document.getElementById('svgSpace');
+                    while (mySvg.hasChildNodes()) {
+                        mySvg.removeChild(mySvg.lastChild);
+                    }
+                    setVars();
+                    makeAxis();
+                    Graph();
+                },
 
-            var buildKey = function() {
-                var blackout = $( '<div />', { 'class' : 'blackout' } );
-                var key = $( '#key' );
-                key.addClass( 'modalBox' ).show();
-                var keyBlock = $( '<div />', { 'class' : 'modalBlock' } ).append( blackout ).append( key );
-                $( 'body' ).prepend( keyBlock );
-                $( '#closeKey' ).unbind().bind( 'click', function(){
-                    keyBlock.hide();
-                } );
-                $( '#showKey' ).unbind().bind( 'click', function(){
-                    keyBlock.show();
-                } );
-            };
+                Trunc = function (a) {
+                    return Math.round(a * 10000) / 10000;
+                },
 
-            var init = function() {
+                drawLine = function (x1, y1, x2, y2, strokecolor, strokeweight) {
+                    var mySvg = document.getElementById('svgSpace'),
+                        line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+
+                    if (!isNaN(x1) && !isNaN(x2) && !isNaN(y1) && !isNaN(y2)
+                            && x1 >= 0 && x2 >= 0 && y1 >= 0 && y2 >= 0) {
+                        line.setAttribute('x1', x1);
+                        line.setAttribute('y1', y1);
+                        line.setAttribute('x2', x2);
+                        line.setAttribute('y2', y2);
+                        line.setAttribute('x2', x2);
+                        line.setAttribute('stroke', strokecolor);
+                        line.setAttribute('stroke-width', strokeweight);
+                        mySvg.appendChild(line);
+                    }
+                },
+
+                Graph = function () {
+                    //draws the graph
+                    var i,
+                        range = SetGraph();
+
+                    xx = parseFloat(range[1]);
+                    xn = parseFloat(range[0]);
+                    yx = range[3];
+                    yn = range[2];
+                    for (i = 0; i < equation.length; i++) {
+                        if (equation[i] !== '') {
+                            equater(xx, xn, yx, yn, equation[i], cc[i]);
+                        }
+                    }
+                },
+
+                equater = function (xx, xn, yx, yn, eq, cc) {
+                    var xvalue, yvalue, ypoint1, ypoint2, j,
+                        i = 0;
+                    while (i < width) {
+                        xvalue = unTransformX(i, xx, xn);
+                        xvalue = Trunc(xvalue);
+                        yvalue = GoFigure(eq, xvalue);
+                        ypoint1 = TransformY(yvalue, yx, yn);
+                        if (ypoint1 < 0) {
+                            ypoint1 = 0;
+                        }
+                        if (ypoint1 > height) {
+                            ypoint1 = height;
+                        }
+                        j = i + 1;
+                        xvalue = unTransformX(j, xx, xn);
+                        xvalue = Trunc(xvalue);
+                        yvalue = GoFigure(eq, xvalue);
+                        ypoint2 = TransformY(yvalue, yx, yn);
+                        if (ypoint2 < 0) {
+                            ypoint2 = 0;
+                        }
+                        if (ypoint2 > height) {
+                            ypoint2 = height;
+                        }
+                        if (!(((ypoint1 == 0) && (ypoint2 == 0)) || ((ypoint1 == height) && (ypoint2 == height)))) {
+                            drawLine(i, ypoint1, j, ypoint2, cc, 1);
+                        }
+                        i = j;
+                    }
+                },
+
+                makeAxis = function () {
+                    var range, marks, mark, i, xp, yp, xaxis, yaxis,
+                        mySvg = document.getElementById('svgSpace'),
+                        rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('width', width + 'px');
+                    rect.setAttribute('height', height + 'px');
+                    rect.setAttribute('fill', bg);
+                    rect.setAttribute('x', 0);
+                    rect.setAttribute('y', 0);
+                    rect.setAttribute('stroke', '#000000');
+                    rect.setAttribute('stroke-width', 1);
+                    mySvg.appendChild(rect);
+
+                    range = SetGraph();
+                    xx = parseFloat(range[1]);
+                    xn = parseFloat(range[0]);
+                    yx = range[3];
+                    yn = range[2];
+                    marks = document.equater.marks;
+                    for (i = 0; i < marks.length; i++) {
+                        if (marks[i].checked) {
+                            mark = marks[i].value;
+                            break;
+                        }
+                    }
+                    xaxis = TransformY(0, yx, yn);
+                    yaxis = TransformX(0, xx, xn);
+                    if (xaxis > 0 && xaxis < height) {
+                        drawLine(0, xaxis, width, xaxis, ax, 2);
+                    }
+                    if (yaxis > 0 && yaxis < width) {
+                        drawLine(yaxis, 0, yaxis, height, ax, 2);
+                    }
+                    //x-hash positive & negative
+                    if (mark == 'Hash' && (xaxis > 0 && xaxis < height)) {
+                        for (i = 1; i <= xx; i++) {
+                            xp = TransformX(i, xx, xn);
+                            drawLine(xp, (xaxis + 2), xp, (xaxis - 2), ax, 1);
+                        }
+                        for (i = -1; i >= xn; i--) {
+                            xp = TransformX(i, xx, xn);
+                            drawLine(xp, (xaxis + 2), xp, (xaxis - 2), ax, 1);
+                        }
+                    }
+                    //y-hash positive & negative
+                    if (mark == 'Hash' && (yaxis > 0 && yaxis < width)) {
+                        for (i = 1; i <= yx; i++) {
+                            yp = TransformY(i, yx, yn);
+                            drawLine((yaxis - 2), yp, (yaxis + 2), yp, ax, 1);
+                        }
+                        for (i = -1; i >= yn; i--) {
+                            yp = TransformY(i, yx, yn);
+                            drawLine((yaxis - 2), yp, (yaxis + 2), yp, ax, 1);
+                        }
+                    }
+                    //x-grid positive & negative
+                    if (mark == 'Grid') {
+                        for (i = 1; i <= xx; i++) {
+                            xp = TransformX(i, xx, xn);
+                            drawLine(xp, 0, xp, height, glc, 1);
+                        }
+                        for (i = -1; i >= xn; i--) {
+                            xp = TransformX(i, xx, xn);
+                            drawLine(xp, 0, xp, height, glc, 1);
+                        }
+                    }
+                    //y-grid positive & negative
+                    if (mark == 'Grid') {
+                        for (i = 1; i <= yx; i++) {
+                            yp = TransformY(i, yx, yn);
+                            drawLine(0, yp, width, yp, glc, 1);
+                        }
+                        for (i = -1; i >= yn; i--) {
+                            yp = TransformY(i, yx, yn);
+                            drawLine(0, yp, width, yp, glc, 1);
+                        }
+                    }
+                },
+
+                binder = function () {
+                    $('#graphIt').unbind().bind('click', draw);
+                    $('#addFx').unbind().bind('click', addEquation);
+                    $('#ShiftUp').unbind().bind('click', function () {
+                        shifter('up');
+                    });
+                    $('#ShiftDown').unbind().bind('click', function () {
+                        shifter('down');
+                    });
+                    $('#ShiftLeft').unbind().bind('click', function () {
+                        shifter('left');
+                    });
+                    $('#ShiftRight').unbind().bind('click', function () {
+                        shifter('right');
+                    });
+                    $('#ZoomIn').unbind().bind('click', function () {
+                        shifter('in');
+                    });
+                    $('#ZoomOut').unbind().bind('click', function () {
+                        shifter('out');
+                    });
+                },
+
+                addEquation = function () {
+                    var input, span, div;
+                    equationCounter += 1;
+                    if (equationCounter < 6) {
+                        input = $('<input />', { 'type': 'text', 'class': 'equation' }).attr({ 'size': '30' });
+                        span = $('<span />', { 'class': 'fx' }).html('<i>f</i><sub>' + equationCounter + '</sub>(x): ');
+                        div = $('<div />').append(span).append(input);
+                        $('#equations').append(div);
+                        setVars();
+                    }
+                    if (equationCounter === 5) {
+                        $('#addFx').hide();
+                    }
+                },
+
+                setBackground = function () {
+                    var container = document.getElementById('mapFrame'),
+                        mySvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+                    mySvg.setAttribute('version', '1.1');
+                    mySvg.setAttribute('id', 'svgSpace');
+                    mySvg.setAttribute('width', width + 'px');
+                    mySvg.setAttribute('height', height + 'px');
+                    container.appendChild(mySvg);
+                },
+
+                buildKey = function () {
+                    var keyBlock,
+                        blackout = $('<div />', { 'class': 'blackout' }),
+                        key = $('#key');
+                    key.addClass('modalBox').show();
+                    keyBlock = $('<div />', { 'class': 'modalBlock' }).append(blackout).append(key);
+                    $('body').prepend(keyBlock);
+                    $('#closeKey').unbind().bind('click', function (){
+                        keyBlock.hide();
+                    });
+                    $('#showKey').unbind().bind('click', function (){
+                        keyBlock.show();
+                    });
+                };
+
+            init = function () {
                 binder();
                 setBackground();
                 draw();
@@ -349,110 +383,111 @@
             init();
         };
 
-        var layout = function() {
-            var screenWidth = $( window ).width();
-            var screenHeight = $( window ).height();
-            screenWidth -= 5;
-            screenHeight -= 10;
-            if ( screenWidth > 600 ) {
-                menuWidth = 280
-                graph = screenWidth - menuWidth;
-                footer = 40;
-                mainHeight = screenHeight - footer - 0;
-                $( '#mainMenu' ).css( {
-                    'height' : mainHeight + 'px',
-                    'width' : menuWidth + 'px',
-                    'top' : '5px',
-                    'left' : '0px'
-                } );
-                $( '#mapFrame' ).css( {
-                    'height' : mainHeight + 'px',
-                    'width' : graph + 'px',
-                    'top' : '5px',
-                    'left' : menuWidth + 'px'
-                } );
-                $( '#footerControls' ).css( {
-                    'height' : ( footer -5 ) + 'px',
-                    'width' : screenWidth + 'px',
-                    'left' : '0px',
-                    'top' : mainHeight + 'px'
-                } );
-                return { 'height' : mainHeight, 'width' : graph };
+        var layout = function () {
+            var returnLayout = false,
+                screenWidth = $(window).width() - 5,
+                screenHeight = $(window).height() - 10,
+                menuWidth = 280,
+                footer = 40,
+                graph = screenWidth - menuWidth,
+                mainHeight = screenHeight - footer;
+
+            if (screenWidth > 600) {
+                $('#mainMenu').css({
+                    'height': mainHeight + 'px',
+                    'width': menuWidth + 'px',
+                    'top': '5px',
+                    'left': '0px'
+                });
+                $('#mapFrame').css({
+                    'height': mainHeight + 'px',
+                    'width': graph + 'px',
+                    'top': '5px',
+                    'left': menuWidth + 'px'
+                });
+                $('#footerControls').css({
+                    'height': (footer - 5) + 'px',
+                    'width': screenWidth + 'px',
+                    'left': '0px',
+                    'top': mainHeight + 'px'
+                });
+                returnLayout = { 'height': mainHeight, 'width': graph };
             }
-            return false;
+            return returnLayout;
         };
         //-------------------------------------------
 
-        $( 'document' ).ready( function() {
-            var dims = layout();
-            if ( dims ) {
-                var Grapher = new GraphingCalculator( $( '#container' ), dims.height, dims.width );
+        $('document').ready(function () {
+            var Grapher,
+                dims = layout();
+            if (dims) {
+                Grapher = new GraphingCalculator($('#container'), dims.height, dims.width);
             } else {
-                alert( 'Please increase the size of this browser to view this app, and then refresh the page.' );
+                alert('Please increase the size of this browser to view this app, and then refresh the page.');
             }
-        } );
+        });
 
         //-->
     </script>
     <style type="text/css">
         body {
-            margin : 0px;
-            padding : 0px;
-            background-color : #d0d0d0;
+            margin: 0;
+            padding: 0;
+            background-color: #d0d0d0;
         }
         #mainMenu {
-            position : absolute;
-            text-align : center;
-            background-color : #d0d0d0;
+            position: absolute;
+            text-align: center;
+            background-color: #d0d0d0;
         }
         #mapFrame {
-            position : absolute;
-            background-color : #808080;
+            position: absolute;
+            background-color: #808080;
         }
         #footerControls {
-            position : absolute;
-            text-align : center;
-            margin-top : 10px;
-            background-color : #d0d0d0;
+            position: absolute;
+            text-align: center;
+            margin-top: 10px;
+            background-color: #d0d0d0;
         }
         h1 {
-            font-size : 22px;
+            font-size: 22px;
         }
         #customize {
-            display : none;
+            display: none;
         }
         #tk {
-            display:none;
+            display: none;
         }
         #key {
             margin: 0 auto;
             position: relative;
-            display : none;
-            background-color : #e0e0e0;
-            border : 1px solid #404040;
-            width : 400px;
-            height : 400px;
-            top : 50px;
+            display: none;
+            background-color: #e0e0e0;
+            border: 1px solid #404040;
+            width: 400px;
+            height: 400px;
+            top: 50px;
         }
         .modalBlock {
-            display : none;
+            display: none;
         }
         .blackout {
-            background : none repeat scroll 0 0 rgba(0, 0, 0, 0.7);
-            height : 100%;
-            left : 0;
-            overflow-y : auto;
-            position : fixed;
-            top : 0;
-            width : 100%;
-            z-index : 999999;
+            background: none repeat scroll 0 0 rgba(0, 0, 0, 0.7);
+            height: 100%;
+            left: 0;
+            overflow-y: auto;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999999;
         }
         .modalBox {
-            font-size : 12px;
-            position : fixed;
-            top : 40%;
-            width : 100%;
-            z-index : 1999999;
+            font-size: 12px;
+            position: fixed;
+            top: 40%;
+            width: 100%;
+            z-index: 1999999;
         }
     </style>
 </head>
