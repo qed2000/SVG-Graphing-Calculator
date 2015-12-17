@@ -104,30 +104,30 @@
                 shifter = function (zed) {
                     var shift;
                     setVars();
-                    if (zed == 'up') {
+                    if (zed === 'up') {
                         shift = sinc * (yx - yn);
                         yx += shift;
                         yn += shift;
-                    } else if (zed == 'down') {
+                    } else if (zed === 'down') {
                         shift = sinc * (yx - yn);
                         yx -= shift;
                         yn -= shift;
-                    } else if (zed == 'left') {
+                    } else if (zed === 'left') {
                         shift = sinc * (xx - xn);
                         xx -= shift;
                         xn -= shift;
-                    } else if (zed == 'right') {
+                    } else if (zed === 'right') {
                         shift = sinc * (xx - xn);
                         xx += shift;
                         xn += shift;
-                    } else if (zed == 'in') {
+                    } else if (zed === 'in') {
                         shifty = zinc * (yx - yn);
                         yx -= shifty;
                         yn += shifty;
                         shiftx = zinc * (xx - xn);
                         xx -= shiftx;
                         xn += shiftx;
-                    } else if (zed == 'out') {
+                    } else if (zed === 'out') {
                         shifty = zinc * (yx - yn);
                         yx += shifty;
                         yn -= shifty;
@@ -191,7 +191,7 @@
                     xn = parseFloat(range[0]);
                     yx = range[3];
                     yn = range[2];
-                    for (i = 0; i < equation.length; i++) {
+                    for (i = 0; i < equation.length; i += 1) {
                         if (equation[i] !== '') {
                             equater(xx, xn, yx, yn, equation[i], cc[i]);
                         }
@@ -223,7 +223,7 @@
                         if (ypoint2 > height) {
                             ypoint2 = height;
                         }
-                        if (!(((ypoint1 == 0) && (ypoint2 == 0)) || ((ypoint1 == height) && (ypoint2 == height)))) {
+                        if (!(((ypoint1 === 0) && (ypoint2 === 0)) || ((ypoint1 === height) && (ypoint2 === height)))) {
                             drawLine(i, ypoint1, j, ypoint2, cc, 1);
                         }
                         i = j;
@@ -249,7 +249,7 @@
                     yx = range[3];
                     yn = range[2];
                     marks = document.equater.marks;
-                    for (i = 0; i < marks.length; i++) {
+                    for (i = 0; i < marks.length; i += 1) {
                         if (marks[i].checked) {
                             mark = marks[i].value;
                             break;
@@ -264,45 +264,45 @@
                         drawLine(yaxis, 0, yaxis, height, ax, 2);
                     }
                     //x-hash positive & negative
-                    if (mark == 'Hash' && (xaxis > 0 && xaxis < height)) {
-                        for (i = 1; i <= xx; i++) {
+                    if (mark === 'Hash' && (xaxis > 0 && xaxis < height)) {
+                        for (i = 1; i <= xx; i += 1) {
                             xp = TransformX(i, xx, xn);
                             drawLine(xp, (xaxis + 2), xp, (xaxis - 2), ax, 1);
                         }
-                        for (i = -1; i >= xn; i--) {
+                        for (i = -1; i >= xn; i -= 1) {
                             xp = TransformX(i, xx, xn);
                             drawLine(xp, (xaxis + 2), xp, (xaxis - 2), ax, 1);
                         }
                     }
                     //y-hash positive & negative
-                    if (mark == 'Hash' && (yaxis > 0 && yaxis < width)) {
-                        for (i = 1; i <= yx; i++) {
+                    if (mark === 'Hash' && (yaxis > 0 && yaxis < width)) {
+                        for (i = 1; i <= yx; i += 1) {
                             yp = TransformY(i, yx, yn);
                             drawLine((yaxis - 2), yp, (yaxis + 2), yp, ax, 1);
                         }
-                        for (i = -1; i >= yn; i--) {
+                        for (i = -1; i >= yn; i -= 1) {
                             yp = TransformY(i, yx, yn);
                             drawLine((yaxis - 2), yp, (yaxis + 2), yp, ax, 1);
                         }
                     }
                     //x-grid positive & negative
-                    if (mark == 'Grid') {
-                        for (i = 1; i <= xx; i++) {
+                    if (mark === 'Grid') {
+                        for (i = 1; i <= xx; i += 1) {
                             xp = TransformX(i, xx, xn);
                             drawLine(xp, 0, xp, height, glc, 1);
                         }
-                        for (i = -1; i >= xn; i--) {
+                        for (i = -1; i >= xn; i -= 1) {
                             xp = TransformX(i, xx, xn);
                             drawLine(xp, 0, xp, height, glc, 1);
                         }
                     }
                     //y-grid positive & negative
-                    if (mark == 'Grid') {
-                        for (i = 1; i <= yx; i++) {
+                    if (mark === 'Grid') {
+                        for (i = 1; i <= yx; i += 1) {
                             yp = TransformY(i, yx, yn);
                             drawLine(0, yp, width, yp, glc, 1);
                         }
-                        for (i = -1; i >= yn; i--) {
+                        for (i = -1; i >= yn; i -= 1) {
                             yp = TransformY(i, yx, yn);
                             drawLine(0, yp, width, yp, glc, 1);
                         }
