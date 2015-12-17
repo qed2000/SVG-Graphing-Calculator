@@ -55,7 +55,7 @@
                     },
                     // End Math Functions
 
-                    GoFigure = function (equation, xvalue) {
+                    goFigure = function (equation, xvalue) {
                         //calculates calling math functions
                         var eq = equation.replace(/([a-z\d\)]+)\^([a-z\d]+)/g, 'pow($1,$2)')
                                 .replace(/(\d)x/g, '$1*x')
@@ -69,10 +69,10 @@
                         return eval(eq);
                     },
 
-                    SetGraph = function () {
+                    setGraph = function () {
                         //determines range of graph
-                        var xRange = CheckRange(xx, xn),
-                            yRange = CheckRange(yx, yn),
+                        var xRange = checkRange(xx, xn),
+                            yRange = checkRange(yx, yn),
                             range = [xRange[0], xRange[1], yRange[0], yRange[1]];
 
                         $container.find('#xmax').val(range[1]);
@@ -82,7 +82,7 @@
                         return range;
                     },
 
-                    CheckRange = function (max, min) {
+                    checkRange = function (max, min) {
                         return (min > max) ? [max, min] : [min, max];
                     },
 
@@ -92,12 +92,12 @@
                     },
 
                     //transforms x to match the graph
-                    TransformX = function (val, max, min) {
+                    transformX = function (val, max, min) {
                         return parseFloat((val - min) * width / (max - min));
                     },
 
                     //transforms y to match the graph
-                    TransformY = function (val, max, min) {
+                    transformY = function (val, max, min) {
                         return parseFloat(height - ((val - min) * height / (max - min)));
                     },
 
@@ -148,7 +148,7 @@
                             yx = parseFloat(0.0);
                         }
                         makeAxis();
-                        Graph();
+                        graph();
                     },
 
                     draw = function () {
@@ -158,10 +158,10 @@
                         }
                         setVars();
                         makeAxis();
-                        Graph();
+                        graph();
                     },
 
-                    Trunc = function (a) {
+                    trunc = function (a) {
                         return Math.round(a * 10000) / 10000;
                     },
 
@@ -182,10 +182,10 @@
                         }
                     },
 
-                    Graph = function () {
+                    graph = function () {
                         //draws the graph
                         var i,
-                            range = SetGraph();
+                            range = setGraph();
 
                         xx = parseFloat(range[1]);
                         xn = parseFloat(range[0]);
@@ -203,9 +203,9 @@
                             i = 0;
                         while (i < width) {
                             xvalue = unTransformX(i, xx, xn);
-                            xvalue = Trunc(xvalue);
-                            yvalue = GoFigure(eq, xvalue);
-                            ypoint1 = TransformY(yvalue, yx, yn);
+                            xvalue = trunc(xvalue);
+                            yvalue = goFigure(eq, xvalue);
+                            ypoint1 = transformY(yvalue, yx, yn);
                             if (ypoint1 < 0) {
                                 ypoint1 = 0;
                             }
@@ -214,9 +214,9 @@
                             }
                             j = i + 1;
                             xvalue = unTransformX(j, xx, xn);
-                            xvalue = Trunc(xvalue);
-                            yvalue = GoFigure(eq, xvalue);
-                            ypoint2 = TransformY(yvalue, yx, yn);
+                            xvalue = trunc(xvalue);
+                            yvalue = goFigure(eq, xvalue);
+                            ypoint2 = transformY(yvalue, yx, yn);
                             if (ypoint2 < 0) {
                                 ypoint2 = 0;
                             }
@@ -243,7 +243,7 @@
                         rect.setAttribute('stroke-width', 1);
                         mySvg.appendChild(rect);
 
-                        range = SetGraph();
+                        range = setGraph();
                         xx = parseFloat(range[1]);
                         xn = parseFloat(range[0]);
                         yx = range[3];
@@ -255,8 +255,8 @@
                                 break;
                             }
                         }
-                        xaxis = TransformY(0, yx, yn);
-                        yaxis = TransformX(0, xx, xn);
+                        xaxis = transformY(0, yx, yn);
+                        yaxis = transformX(0, xx, xn);
                         if (xaxis > 0 && xaxis < height) {
                             drawLine(0, xaxis, width, xaxis, ax, 2);
                         }
@@ -266,44 +266,44 @@
                         //x-hash positive & negative
                         if (mark === 'Hash' && (xaxis > 0 && xaxis < height)) {
                             for (i = 1; i <= xx; i += 1) {
-                                xp = TransformX(i, xx, xn);
+                                xp = transformX(i, xx, xn);
                                 drawLine(xp, (xaxis + 2), xp, (xaxis - 2), ax, 1);
                             }
                             for (i = -1; i >= xn; i -= 1) {
-                                xp = TransformX(i, xx, xn);
+                                xp = transformX(i, xx, xn);
                                 drawLine(xp, (xaxis + 2), xp, (xaxis - 2), ax, 1);
                             }
                         }
                         //y-hash positive & negative
                         if (mark === 'Hash' && (yaxis > 0 && yaxis < width)) {
                             for (i = 1; i <= yx; i += 1) {
-                                yp = TransformY(i, yx, yn);
+                                yp = transformY(i, yx, yn);
                                 drawLine((yaxis - 2), yp, (yaxis + 2), yp, ax, 1);
                             }
                             for (i = -1; i >= yn; i -= 1) {
-                                yp = TransformY(i, yx, yn);
+                                yp = transformY(i, yx, yn);
                                 drawLine((yaxis - 2), yp, (yaxis + 2), yp, ax, 1);
                             }
                         }
                         //x-grid positive & negative
                         if (mark === 'Grid') {
                             for (i = 1; i <= xx; i += 1) {
-                                xp = TransformX(i, xx, xn);
+                                xp = transformX(i, xx, xn);
                                 drawLine(xp, 0, xp, height, glc, 1);
                             }
                             for (i = -1; i >= xn; i -= 1) {
-                                xp = TransformX(i, xx, xn);
+                                xp = transformX(i, xx, xn);
                                 drawLine(xp, 0, xp, height, glc, 1);
                             }
                         }
                         //y-grid positive & negative
                         if (mark === 'Grid') {
                             for (i = 1; i <= yx; i += 1) {
-                                yp = TransformY(i, yx, yn);
+                                yp = transformY(i, yx, yn);
                                 drawLine(0, yp, width, yp, glc, 1);
                             }
                             for (i = -1; i >= yn; i -= 1) {
-                                yp = TransformY(i, yx, yn);
+                                yp = transformY(i, yx, yn);
                                 drawLine(0, yp, width, yp, glc, 1);
                             }
                         }
@@ -389,7 +389,7 @@
                     screenHeight = $(window).height() - 10,
                     menuWidth = 280,
                     footer = 40,
-                    graph = screenWidth - menuWidth,
+                    graphWidth = screenWidth - menuWidth,
                     mainHeight = screenHeight - footer;
 
                 if (screenWidth > 600) {
@@ -411,17 +411,17 @@
                         'left': '0px',
                         'top': mainHeight + 'px'
                     });
-                    returnLayout = { 'height': mainHeight, 'width': graph };
+                    returnLayout = { 'height': mainHeight, 'width': graphWidth };
                 }
                 return returnLayout;
             };
             //-------------------------------------------
 
             $('document').ready(function () {
-                var Grapher,
-                    dims = layout();
+                var dims = layout();
+
                 if (dims) {
-                    Grapher = new GraphingCalculator($('#container'), dims.height, dims.width);
+                    new GraphingCalculator($('#container'), dims.height, dims.width);
                 } else {
                     alert('Please increase the size of this browser to view this app, and then refresh the page.');
                 }
